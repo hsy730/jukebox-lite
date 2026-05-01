@@ -1,0 +1,53 @@
+<view class="page" wx:if="{{order}}">
+  <view class="success-header">
+    <view class="success-icon-wrap">
+      <text class="success-icon">✓</text>
+    </view>
+    <text class="success-title">点歌成功！</text>
+    <text class="success-subtitle">已通知歌手，请耐心等待</text>
+  </view>
+
+  <view class="order-card">
+    <view class="order-header">
+      <text class="order-id">订单号：{{order.id}}</text>
+      <text class="order-status pending">待演唱</text>
+    </view>
+
+    <view class="order-song">
+      <image class="order-cover" src="{{order.cover}}" mode="aspectFill" />
+      <view class="order-song-info">
+        <text class="order-song-name">{{order.song_name}}</text>
+        <text class="order-song-artist">{{order.artist}}</text>
+      </view>
+    </view>
+
+    <view class="order-detail">
+      <view class="detail-row">
+        <text class="detail-label">演唱歌手</text>
+        <text class="detail-value">{{order.singer_name}}</text>
+      </view>
+      <view class="detail-row" wx:if="{{order.message}}">
+        <text class="detail-label">祝福留言</text>
+        <text class="detail-value">{{order.message}}</text>
+      </view>
+      <view class="detail-row">
+        <text class="detail-label">支付积分</text>
+        <text class="detail-value price">{{order.price}} 积分</text>
+      </view>
+      <view class="detail-row">
+        <text class="detail-label">下单时间</text>
+        <text class="detail-value">{{order.created_at_str || ''}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-area">
+    <button class="btn-primary" bindtap="onBackHome">返回首页</button>
+  </view>
+</view>
+
+<view class="empty-state" wx:else>
+  <text class="empty-icon">📋</text>
+  <text class="empty-text">订单信息加载失败</text>
+  <button class="btn-primary" style="margin-top: 40rpx;" bindtap="onBackHome">返回首页</button>
+</view>

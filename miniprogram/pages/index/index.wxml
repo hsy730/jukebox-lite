@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <image class="search-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E" />
+      <input class="search-input" placeholder="搜索歌曲、歌手" value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" confirm-type="search" />
+      <view class="search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">✕</view>
+    </view>
+    <view class="source-picker">
+      <picker mode="selector" range="{{['网易云', '酷我', 'QQ']}}" bindchange="onSourceChange">
+        <view class="source-label">{{source === 'netease' ? '网易云' : source === 'kuwo' ? '酷我' : 'QQ'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <scroll-view class="category-scroll" scroll-x enable-flex>
+    <view class="category-item {{activeCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-id="" data-name="推荐">
+      <text>推荐</text>
+    </view>
+    <view class="category-item {{activeCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onCategoryTap" data-id="{{item.id}}" data-name="{{item.name}}">
+      <text>{{item.name}}</text>
+    </view>
+  </scroll-view>
+
+  <view class="song-list">
+    <view class="song-card" wx:for="{{songs}}" wx:key="id" bindtap="onSongTap" data-song="{{item}}">
+      <image class="song-cover" src="{{item.cover || item.pic}}" mode="aspectFill" lazy-load />
+      <view class="song-info">
+        <text class="song-name">{{item.name}}</text>
+        <text class="song-artist">{{item.artist}}</text>
+        <text class="song-album" wx:if="{{item.album}}">{{item.album}}</text>
+      </view>
+      <view class="song-action">
+        <text class="song-price">点歌</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!loading && songs.length === 0}}">
+      <text class="empty-icon">🎵</text>
+      <text class="empty-text">暂无歌曲数据</text>
+    </view>
+
+    <view class="loading-tip" wx:if="{{loading}}">
+      <text>加载中...</text>
+    </view>
+    <view class="loading-tip" wx:if="{{!hasMore && songs.length > 0}}">
+      <text>没有更多了</text>
+    </view>
+  </view>
+</view>

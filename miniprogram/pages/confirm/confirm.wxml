@@ -1,0 +1,44 @@
+<view class="page" wx:if="{{song}}">
+  <view class="song-detail-card">
+    <image class="detail-cover" src="{{song.cover || song.pic}}" mode="aspectFill" />
+    <view class="detail-info">
+      <text class="detail-name">{{song.name}}</text>
+      <text class="detail-artist">{{song.artist}}</text>
+      <text class="detail-album" wx:if="{{song.album}}">{{song.album}}</text>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="form-title">选择歌手</view>
+    <picker mode="selector" range="{{singers}}" range-key="name" bindchange="onSingerChange">
+      <view class="picker-value {{selectedSingerIndex >= 0 ? '' : 'placeholder'}}">
+        {{selectedSingerIndex >= 0 ? singers[selectedSingerIndex].name : '请选择歌手'}}
+      </view>
+    </picker>
+  </view>
+
+  <view class="form-section">
+    <view class="form-title">祝福语/留言</view>
+    <textarea class="message-input" placeholder="写下你的祝福或留言（选填）" value="{{message}}" bindinput="onMessageInput" maxlength="200" />
+    <text class="char-count">{{message.length}}/200</text>
+  </view>
+
+  <view class="form-section">
+    <view class="form-title">点歌费用</view>
+    <view class="price-display">
+      <text class="price-number">{{price}}</text>
+      <text class="price-unit">积分</text>
+    </view>
+  </view>
+
+  <view class="submit-area">
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}" loading="{{submitting}}">
+      {{submitting ? '提交中...' : '确认点歌'}}
+    </button>
+  </view>
+</view>
+
+<view class="empty-state" wx:else>
+  <text class="empty-icon">🎵</text>
+  <text class="empty-text">歌曲信息加载失败</text>
+</view>

@@ -1,0 +1,168 @@
+.page {
+  background: #F5F5F5;
+  min-height: 100vh;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  background: #FF6B6B;
+}
+
+.search-input-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 36rpx;
+  padding: 12rpx 24rpx;
+}
+
+.search-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  height: 40rpx;
+}
+
+.search-clear {
+  font-size: 28rpx;
+  color: #999;
+  padding: 0 8rpx;
+}
+
+.source-picker {
+  margin-left: 16rpx;
+}
+
+.source-label {
+  font-size: 26rpx;
+  color: #fff;
+  background: rgba(255,255,255,0.3);
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+}
+
+.category-scroll {
+  white-space: nowrap;
+  background: #fff;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.category-item {
+  display: inline-block;
+  padding: 10rpx 28rpx;
+  margin-right: 16rpx;
+  font-size: 26rpx;
+  color: #666;
+  background: #f0f0f0;
+  border-radius: 28rpx;
+}
+
+.category-item.active {
+  background: #FF6B6B;
+  color: #fff;
+}
+
+.song-list {
+  padding: 16rpx 24rpx;
+}
+
+.song-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.song-cover {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  background: #eee;
+}
+
+.song-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.song-name {
+  display: block;
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-artist {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-album {
+  display: block;
+  font-size: 22rpx;
+  color: #bbb;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-action {
+  margin-left: 16rpx;
+}
+
+.song-price {
+  display: block;
+  font-size: 24rpx;
+  color: #FF6B6B;
+  background: rgba(255,107,107,0.1);
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+  font-weight: 500;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.loading-tip {
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 24rpx;
+  color: #999;
+}
