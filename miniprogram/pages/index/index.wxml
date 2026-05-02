@@ -1,7 +1,7 @@
 <view class="page">
   <view class="top-bar">
     <view class="user-info" bindtap="{{userInfo ? 'onLogout' : 'onTapLogin'}}">
-      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+      <image class="user-avatar" src="{{userInfo.avatar || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23ddd%22/%3E%3Ctext x=%2250%22 y=%2258%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22%23999%22%3E%F0%9F%91%A4%3C/text%3E%3C/svg%3E'}}" mode="aspectFill" />
       <text class="user-name">{{userInfo.nick_name || '点击登录'}}</text>
     </view>
     <view class="role-switch" bindtap="onSwitchRole">

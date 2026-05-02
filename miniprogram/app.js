@@ -2,7 +2,7 @@ var api = require('./utils/api.js');
 
 App({
   globalData: {
-    apiBase: 'http://localhost:8080/api',
+    apiBase: 'http://127.0.0.1:8080/api',
     userInfo: null
   },
 
