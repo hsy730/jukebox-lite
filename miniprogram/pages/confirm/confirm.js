@@ -1,4 +1,5 @@
 var api = require('../../utils/api.js');
+var app = getApp();
 
 Page({
   data: {
@@ -22,6 +23,15 @@ Page({
     this.loadSingers();
   },
 
+  requireLogin: function (callback) {
+    if (!app.globalData.userInfo) {
+      wx.navigateTo({ url: '/pages/login/login' });
+      return false;
+    }
+    if (callback) callback();
+    return true;
+  },
+
   loadSingers: function () {
     var that = this;
     api.getSingers(1, 50).then(function (res) {
@@ -40,6 +50,14 @@ Page({
   onSubmit: function () {
     if (this.data.submitting) return;
 
+    var that = this;
+    // 提交订单需要登录
+    if (!that.requireLogin(function () {
+      that.doSubmit();
+    })) return;
+  },
+
+  doSubmit: function () {
     var song = this.data.song;
     var idx = this.data.selectedSingerIndex;
     if (!song) {

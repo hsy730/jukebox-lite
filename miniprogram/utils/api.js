@@ -1,15 +1,44 @@
 var app = getApp();
 
+function getToken() {
+  return wx.getStorageSync('token') || '';
+}
+
+function setToken(token) {
+  wx.setStorageSync('token', token);
+}
+
+function removeToken() {
+  wx.removeStorageSync('token');
+}
+
 function request(options) {
   return new Promise(function (resolve, reject) {
+    var header = Object.assign({
+      'Content-Type': 'application/json'
+    }, options.header || {});
+
+    var token = getToken();
+    if (token) {
+      header['Authorization'] = 'Bearer ' + token;
+    }
+
     wx.request({
       url: app.globalData.apiBase + options.url,
       method: options.method || 'GET',
       data: options.data || {},
-      header: Object.assign({
-        'Content-Type': 'application/json'
-      }, options.header || {}),
+      header: header,
       success: function (res) {
+        if (res.statusCode === 401) {
+          removeToken();
+          app.globalData.userInfo = null;
+          wx.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
+          setTimeout(function () {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }, 1500);
+          reject(res.data);
+          return;
+        }
         if (res.data.code === 0) {
           resolve(res.data);
         } else {
@@ -28,6 +57,35 @@ function request(options) {
         reject(err);
       }
     });
+  });
+}
+
+function login(code, nickName, avatar) {
+  return request({
+    url: '/auth/login',
+    method: 'POST',
+    data: {
+      code: code,
+      nick_name: nickName || '',
+      avatar: avatar || ''
+    },
+    header: {}
+  });
+}
+
+function getProfile() {
+  return request({
+    url: '/auth/profile'
+  });
+}
+
+function switchRole(role) {
+  return request({
+    url: '/auth/role',
+    method: 'PUT',
+    data: {
+      role: role
+    }
   });
 }
 
@@ -121,6 +179,12 @@ function getSingers(page, limit) {
 
 module.exports = {
   request: request,
+  getToken: getToken,
+  setToken: setToken,
+  removeToken: removeToken,
+  login: login,
+  getProfile: getProfile,
+  switchRole: switchRole,
   searchSongs: searchSongs,
   getCategories: getCategories,
   getCategorySongs: getCategorySongs,

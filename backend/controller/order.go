@@ -32,10 +32,13 @@ func (ctrl *OrderController) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	userOpenID := c.GetHeader("X-User-OpenID")
-	userNick := c.GetHeader("X-User-Nick")
+	userOpenID, _ := c.Get("open_id")
+	userNick := ""
+	if user, exists := c.Get("user_nick"); exists {
+		userNick, _ = user.(string)
+	}
 
-	order, err := ctrl.orderService.CreateOrder(&params, userOpenID, userNick)
+	order, err := ctrl.orderService.CreateOrder(&params, userOpenID.(string), userNick)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.APIResponse{Code: 500, Message: err.Error()})
 		return
@@ -80,14 +83,12 @@ func (ctrl *OrderController) ListOrdersBySinger(c *gin.Context) {
 }
 
 func (ctrl *OrderController) ListOrdersByUser(c *gin.Context) {
-	openID := c.GetHeader("X-User-OpenID")
-	if openID == "" {
-		openID = c.Query("open_id")
-	}
+	openID, _ := c.Get("open_id")
+	openIDStr := openID.(string)
 	page := getIntParam(c, "page", 1)
 	limit := getIntParam(c, "limit", 20)
 
-	orders, total, err := ctrl.orderService.ListOrdersByUser(openID, page, limit)
+	orders, total, err := ctrl.orderService.ListOrdersByUser(openIDStr, page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, model.APIResponse{Code: 500, Message: err.Error()})
 		return

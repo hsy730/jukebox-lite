@@ -16,3 +16,9 @@ type SingerRepository interface {
 	List(page, limit int) ([]*model.Singer, int64, error)
 	UpdateStatus(id string, status string) error
 }
+
+type UserRepository interface {
+	Create(user *model.User) error
+	GetByOpenID(openID string) (*model.User, error)
+	UpdateRole(openID string, role string) error
+}

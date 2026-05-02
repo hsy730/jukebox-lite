@@ -63,8 +63,18 @@ func (ctrl *SongController) GetCategorySongs(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, model.APIResponse{Code: 400, Message: "参数错误"})
 		return
 	}
+	// 如果 toplist_id 为空，则使用默认推荐（空字符串表示获取推荐歌曲）
 	if params.ToplistID == "" {
-		c.JSON(http.StatusBadRequest, model.APIResponse{Code: 400, Message: "toplist_id不能为空"})
+		// 返回空列表或调用专门的推荐接口
+		songs, err := ctrl.songService.GetRecommendSongs(params.Source, params.Page, params.Limit)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, model.APIResponse{Code: 500, Message: err.Error()})
+			return
+		}
+		if songs == nil {
+			songs = []*model.Song{}
+		}
+		c.JSON(http.StatusOK, model.APIResponse{Code: 0, Message: "success", Data: songs})
 		return
 	}
 	if params.Page <= 0 {

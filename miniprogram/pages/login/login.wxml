@@ -1,0 +1,22 @@
+<view class="login-page">
+  <view class="login-header">
+    <view class="logo-wrap">
+      <text class="logo-icon">🎤</text>
+    </view>
+    <text class="app-title">点歌台</text>
+    <text class="app-desc">为你喜爱的歌曲下单</text>
+  </view>
+
+  <view class="login-body">
+    <button class="login-btn primary" bindtap="onGetUserProfile" disabled="{{loading}}" loading="{{loading}}">
+      微信授权登录
+    </button>
+    <button class="login-btn quick" bindtap="onQuickLogin" disabled="{{loading}}">
+      快捷登录
+    </button>
+  </view>
+
+  <view class="login-footer">
+    <text class="footer-text">登录即代表同意用户协议和隐私政策</text>
+  </view>
+</view>

@@ -14,28 +14,181 @@ Page({
     hasMore: true,
     loading: false,
     searchMode: false,
-    source: 'netease'
+    source: 'netease',
+    currentRole: 'user',
+    singerOrders: [],
+    singerOrdersPage: 1,
+    singerOrdersTotal: 0,
+    singerOrdersLoading: false,
+    userInfo: null
   },
 
   onLoad: function () {
-    this.loadCategories();
-    this.loadSingers();
-    this.loadRecommendSongs();
+    var userInfo = app.globalData.userInfo;
+    this.setData({
+      userInfo: userInfo,
+      currentRole: (userInfo && userInfo.role) || 'user'
+    });
+    this.loadByRole();
+  },
+
+  onShow: function () {
+    var userInfo = app.globalData.userInfo;
+    this.setData({
+      userInfo: userInfo,
+      currentRole: (userInfo && userInfo.role) || 'user'
+    });
+  },
+
+  requireLogin: function (callback) {
+    if (!app.globalData.userInfo) {
+      wx.navigateTo({ url: '/pages/login/login' });
+      return false;
+    }
+    if (callback) callback();
+    return true;
+  },
+
+  onTapLogin: function () {
+    if (!app.globalData.userInfo) {
+      wx.navigateTo({ url: '/pages/login/login' });
+    }
+  },
+
+  onBecomeSinger: function () {
+    var that = this;
+    if (that.data.currentRole === 'singer') return;
+    if (app.globalData.userInfo) {
+      api.switchRole('singer').then(function (res) {
+        app.globalData.userInfo = res.data;
+        that.setData({ userInfo: res.data });
+      }).catch(function () {});
+    }
+    that.setData({
+      currentRole: 'singer',
+      page: 1,
+      songs: [],
+      hasMore: true,
+      searchMode: false,
+      activeCategory: '',
+      activeCategoryName: '推荐',
+      singerOrders: [],
+      singerOrdersPage: 1
+    });
+    that.loadByRole();
+  },
+
+  switchToSinger: function () {
+    this.onBecomeSinger();
+  },
+
+  loadByRole: function () {
+    if (this.data.currentRole === 'singer') {
+      this.loadSingerOrders();
+    } else {
+      this.loadCategories();
+      this.loadSingers();
+      this.loadRecommendSongs();
+    }
+  },
+
+  onSwitchRole: function () {
+    var that = this;
+    var newRole = that.data.currentRole === 'user' ? 'singer' : 'user';
+
+    if (app.globalData.userInfo) {
+      api.switchRole(newRole).then(function (res) {
+        app.globalData.userInfo = res.data;
+        that.setData({ userInfo: res.data });
+      }).catch(function () {});
+    }
+
+    that.setData({
+      currentRole: newRole,
+      page: 1,
+      songs: [],
+      hasMore: true,
+      searchMode: false,
+      activeCategory: '',
+      activeCategoryName: '推荐',
+      singerOrders: [],
+      singerOrdersPage: 1
+    });
+    that.loadByRole();
+  },
+
+  onLogout: function () {
+    var that = this;
+    wx.showModal({
+      title: '提示',
+      content: '确定要退出登录吗？',
+      success: function (res) {
+        if (res.confirm) {
+          api.removeToken();
+          app.globalData.userInfo = null;
+          that.setData({
+            userInfo: null,
+            currentRole: 'user',
+            page: 1,
+            songs: [],
+            hasMore: true,
+            searchMode: false,
+            activeCategory: '',
+            activeCategoryName: '推荐',
+            singerOrders: [],
+            singerOrdersPage: 1
+          });
+          that.loadByRole();
+        }
+      }
+    });
+  },
+
+  loadSingerOrders: function () {
+    var that = this;
+    if (!app.globalData.userInfo) {
+      that.setData({ singerOrders: [], singerOrdersTotal: 0, singerOrdersLoading: false });
+      return;
+    }
+    that.setData({ singerOrdersLoading: true });
+    api.getUserOrders(that.data.singerOrdersPage, 20).then(function (res) {
+      var newList = (res.data && res.data.list) || [];
+      that.setData({
+        singerOrders: that.data.singerOrdersPage === 1 ? newList : that.data.singerOrders.concat(newList),
+        singerOrdersTotal: (res.data && res.data.total) || 0,
+        singerOrdersLoading: false
+      });
+    }).catch(function () {
+      that.setData({ singerOrdersLoading: false });
+    });
   },
 
   onPullDownRefresh: function () {
-    this.setData({ page: 1, songs: [], hasMore: true });
-    if (this.data.searchMode) {
-      this.doSearch();
-    } else if (this.data.activeCategory) {
-      this.loadCategorySongs();
+    if (this.data.currentRole === 'singer') {
+      this.setData({ singerOrdersPage: 1, singerOrders: [] });
+      this.loadSingerOrders();
     } else {
-      this.loadRecommendSongs();
+      this.setData({ page: 1, songs: [], hasMore: true });
+      if (this.data.searchMode) {
+        this.doSearch();
+      } else if (this.data.activeCategory) {
+        this.loadCategorySongs();
+      } else {
+        this.loadRecommendSongs();
+      }
     }
     wx.stopPullDownRefresh();
   },
 
   onReachBottom: function () {
+    if (this.data.currentRole === 'singer') {
+      var loaded = this.data.singerOrders.length;
+      if (loaded < this.data.singerOrdersTotal && !this.data.singerOrdersLoading) {
+        this.setData({ singerOrdersPage: this.data.singerOrdersPage + 1 });
+        this.loadSingerOrders();
+      }
+      return;
+    }
     if (this.data.hasMore && !this.data.loading) {
       this.setData({ page: this.data.page + 1 });
       if (this.data.searchMode) {
@@ -141,9 +294,13 @@ Page({
 
   onSongTap: function (e) {
     var song = e.currentTarget.dataset.song;
-    wx.navigateTo({
-      url: '/pages/confirm/confirm?song=' + encodeURIComponent(JSON.stringify(song))
-    });
+    var that = this;
+    // 点歌需要登录
+    if (!that.requireLogin(function () {
+      wx.navigateTo({
+        url: '/pages/confirm/confirm?song=' + encodeURIComponent(JSON.stringify(song))
+      });
+    })) return;
   },
 
   onSourceChange: function (e) {
@@ -160,5 +317,33 @@ Page({
     });
     this.loadCategories();
     this.loadRecommendSongs();
+  },
+
+  onOrderStatusTap: function (e) {
+    var orderId = e.currentTarget.dataset.id;
+    var status = e.currentTarget.dataset.status;
+    var newStatus = '';
+    if (status === 'pending') newStatus = 'singing';
+    else if (status === 'singing') newStatus = 'done';
+    if (!newStatus) return;
+
+    var that = this;
+    wx.showModal({
+      title: '确认操作',
+      content: '确定更改订单状态吗？',
+      success: function (res) {
+        if (res.confirm) {
+          api.request({
+            url: '/orders/' + orderId + '/status',
+            method: 'PUT',
+            data: { status: newStatus }
+          }).then(function () {
+            wx.showToast({ title: '状态已更新', icon: 'success' });
+            that.setData({ singerOrdersPage: 1, singerOrders: [] });
+            that.loadSingerOrders();
+          }).catch(function () {});
+        }
+      }
+    });
   }
 });

@@ -12,8 +12,10 @@ import (
 func main() {
 	orderRepo := repository.NewMemoryOrderRepository()
 	singerRepo := repository.NewMemorySingerRepository()
+	userRepo := repository.NewMemoryUserRepository()
 
 	musicAPIService := service.NewMusicAPIService()
+	authService := service.NewAuthService(userRepo)
 	songService := service.NewSongService(musicAPIService)
 	orderService := service.NewOrderService(orderRepo, singerRepo)
 	singerService := service.NewSingerService(singerRepo)
@@ -21,8 +23,9 @@ func main() {
 	songCtrl := controller.NewSongController(songService)
 	orderCtrl := controller.NewOrderController(orderService)
 	singerCtrl := controller.NewSingerController(singerService)
+	authCtrl := controller.NewAuthController(authService)
 
-	r := router.SetupRouter(songCtrl, orderCtrl, singerCtrl)
+	r := router.SetupRouter(songCtrl, orderCtrl, singerCtrl, authCtrl, authService)
 
 	addr := fmt.Sprintf(":%s", config.C.Port)
 	fmt.Printf("🚀 Jukebox Lite Server starting on %s\n", addr)

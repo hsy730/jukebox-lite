@@ -3,6 +3,66 @@
   min-height: 100vh;
 }
 
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 24rpx;
+  background: #FF6B6B;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  background: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 28rpx;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-switch {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.role-btn {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255,255,255,0.25);
+}
+
+.role-btn.singer {
+  background: rgba(255,255,255,0.4);
+}
+
+.role-icon {
+  font-size: 28rpx;
+  margin-right: 6rpx;
+}
+
+.role-text {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
 .search-bar {
   display: flex;
   align-items: center;
@@ -69,6 +129,50 @@
 .category-item.active {
   background: #FF6B6B;
   color: #fff;
+}
+
+.singer-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16rpx 24rpx;
+  padding: 24rpx 28rpx;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255,107,107,0.3);
+}
+
+.singer-entry-left {
+  display: flex;
+  align-items: center;
+}
+
+.singer-entry-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.singer-entry-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.singer-entry-title {
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.singer-entry-desc {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.85);
+  margin-top: 6rpx;
+}
+
+.singer-entry-arrow {
+  font-size: 36rpx;
+  color: rgba(255,255,255,0.9);
+  font-weight: bold;
 }
 
 .song-list {
@@ -165,4 +269,181 @@
   padding: 20rpx 0;
   font-size: 24rpx;
   color: #999;
+}
+
+.singer-panel {
+  padding: 24rpx;
+}
+
+.singer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.singer-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.singer-count {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.order-list {
+  padding: 0;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-card-id {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-card-status {
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+}
+
+.order-card-status.status-pending {
+  background: #FFF3E0;
+  color: #FF9800;
+}
+
+.order-card-status.status-singing {
+  background: #E3F2FD;
+  color: #2196F3;
+}
+
+.order-card-status.status-done {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
+
+.order-card-body {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.order-card-cover {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 12rpx;
+  margin-right: 20rpx;
+  background: #eee;
+  flex-shrink: 0;
+}
+
+.order-card-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.order-card-name {
+  display: block;
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-card-artist {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 6rpx;
+}
+
+.order-card-msg {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 6rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.order-card-user {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-card-action {
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: block;
+  font-size: 24rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+  background: #fff;
+  border-radius: 16rpx;
+}
+
+.login-prompt-icon {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+}
+
+.login-prompt-text {
+  font-size: 30rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.login-prompt-btn {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  color: #fff;
+  font-size: 30rpx;
+  padding: 16rpx 80rpx;
+  border-radius: 40rpx;
+  border: none;
+  line-height: normal;
+}
+
+.login-prompt-btn::after {
+  border: none;
 }

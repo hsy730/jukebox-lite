@@ -170,3 +170,42 @@ func (r *MemorySingerRepository) UpdateStatus(id string, status string) error {
 	singer.Status = status
 	return nil
 }
+
+type MemoryUserRepository struct {
+	mu    sync.RWMutex
+	users map[string]*model.User
+}
+
+func NewMemoryUserRepository() *MemoryUserRepository {
+	return &MemoryUserRepository{
+		users: make(map[string]*model.User),
+	}
+}
+
+func (r *MemoryUserRepository) Create(user *model.User) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.users[user.OpenID] = user
+	return nil
+}
+
+func (r *MemoryUserRepository) GetByOpenID(openID string) (*model.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	user, ok := r.users[openID]
+	if !ok {
+		return nil, fmt.Errorf("user not found: %s", openID)
+	}
+	return user, nil
+}
+
+func (r *MemoryUserRepository) UpdateRole(openID string, role string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	user, ok := r.users[openID]
+	if !ok {
+		return fmt.Errorf("user not found: %s", openID)
+	}
+	user.Role = role
+	return nil
+}

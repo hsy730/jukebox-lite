@@ -31,6 +31,20 @@ type musicAPIResponse struct {
 	Data    json.RawMessage `json:"data"`
 }
 
+type searchResponse struct {
+	Keyword string           `json:"keyword"`
+	Limit   int              `json:"limit"`
+	Page    int              `json:"page"`
+	Total   int              `json:"total"`
+	Results []map[string]any `json:"results"`
+}
+
+type toplistsResponse struct {
+	List   []map[string]any `json:"list"`
+	Total  int              `json:"total"`
+	Source string           `json:"source"`
+}
+
 func (s *MusicAPIService) Search(keyword, source string, page, limit int) ([]*model.Song, error) {
 	params := url.Values{}
 	params.Set("type", "aggregateSearch")
@@ -46,38 +60,11 @@ func (s *MusicAPIService) Search(keyword, source string, page, limit int) ([]*mo
 		return s.mockSearch(keyword, page, limit), nil
 	}
 
-	var songs []*model.Song
-	if err := json.Unmarshal(resp, &songs); err != nil {
-		return s.parseSearchResponse(resp)
+	var searchResp searchResponse
+	if err := json.Unmarshal(resp, &searchResp); err != nil {
+		return s.parseSongList(resp)
 	}
-	return songs, nil
-}
-
-func (s *MusicAPIService) parseSearchResponse(data json.RawMessage) ([]*model.Song, error) {
-	var rawList []map[string]interface{}
-	if err := json.Unmarshal(data, &rawList); err != nil {
-		return nil, err
-	}
-	var songs []*model.Song
-	for _, item := range rawList {
-		song := &model.Song{
-			ID:     fmt.Sprintf("%v", item["id"]),
-			Name:   fmt.Sprintf("%v", item["name"]),
-			Artist: fmt.Sprintf("%v", item["artist"]),
-			Album:  fmt.Sprintf("%v", item["album"]),
-			Source: fmt.Sprintf("%v", item["source"]),
-		}
-		if pic, ok := item["pic"]; ok && pic != nil {
-			song.Cover = fmt.Sprintf("%v", pic)
-		} else if cover, ok := item["cover"]; ok && cover != nil {
-			song.Cover = fmt.Sprintf("%v", cover)
-		}
-		if urlStr, ok := item["url"]; ok && urlStr != nil {
-			song.URL = fmt.Sprintf("%v", urlStr)
-		}
-		songs = append(songs, song)
-	}
-	return songs, nil
+	return s.convertSongList(searchResp.Results), nil
 }
 
 func (s *MusicAPIService) GetToplists(source string) ([]*model.Category, error) {
@@ -94,15 +81,31 @@ func (s *MusicAPIService) GetToplists(source string) ([]*model.Category, error) 
 		return s.mockCategories(), nil
 	}
 
-	var categories []*model.Category
-	if err := json.Unmarshal(resp, &categories); err != nil {
+	var toplistsResp toplistsResponse
+	if err := json.Unmarshal(resp, &toplistsResp); err != nil {
 		return s.parseToplistsResponse(resp)
+	}
+
+	var categories []*model.Category
+	for _, item := range toplistsResp.List {
+		cat := &model.Category{
+			ID:     fmt.Sprintf("%v", item["id"]),
+			Name:   fmt.Sprintf("%v", item["name"]),
+			Source: toplistsResp.Source,
+		}
+		if pic, ok := item["pic"]; ok && pic != nil {
+			cat.Cover = fmt.Sprintf("%v", pic)
+		}
+		categories = append(categories, cat)
+	}
+	if categories == nil {
+		categories = []*model.Category{}
 	}
 	return categories, nil
 }
 
 func (s *MusicAPIService) parseToplistsResponse(data json.RawMessage) ([]*model.Category, error) {
-	var rawList []map[string]interface{}
+	var rawList []map[string]any
 	if err := json.Unmarshal(data, &rawList); err != nil {
 		return nil, err
 	}
@@ -113,9 +116,7 @@ func (s *MusicAPIService) parseToplistsResponse(data json.RawMessage) ([]*model.
 			Name:   fmt.Sprintf("%v", item["name"]),
 			Source: fmt.Sprintf("%v", item["source"]),
 		}
-		if cover, ok := item["cover"]; ok && cover != nil {
-			cat.Cover = fmt.Sprintf("%v", cover)
-		} else if pic, ok := item["pic"]; ok && pic != nil {
+		if pic, ok := item["pic"]; ok && pic != nil {
 			cat.Cover = fmt.Sprintf("%v", pic)
 		}
 		categories = append(categories, cat)
@@ -132,15 +133,17 @@ func (s *MusicAPIService) GetToplistSongs(toplistID, source string, page, limit 
 	} else {
 		params.Set("source", "netease")
 	}
-	params.Set("page", fmt.Sprintf("%d", page))
-	params.Set("limit", fmt.Sprintf("%d", limit))
 
 	resp, err := s.get(params)
 	if err != nil {
 		return s.mockSearch("", page, limit), nil
 	}
 
-	return s.parseSearchResponse(resp)
+	var toplistResp toplistsResponse
+	if err := json.Unmarshal(resp, &toplistResp); err != nil {
+		return s.parseSongList(resp)
+	}
+	return s.convertSongList(toplistResp.List), nil
 }
 
 func (s *MusicAPIService) GetSongInfo(source, id string) (*model.Song, error) {
@@ -159,7 +162,7 @@ func (s *MusicAPIService) GetSongInfo(source, id string) (*model.Song, error) {
 		}, nil
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 	if err := json.Unmarshal(resp, &raw); err != nil {
 		return nil, err
 	}
@@ -171,13 +174,49 @@ func (s *MusicAPIService) GetSongInfo(source, id string) (*model.Song, error) {
 		Album:  fmt.Sprintf("%v", raw["album"]),
 		Source: source,
 	}
-	if pic, ok := raw["pic"]; ok {
+	if pic, ok := raw["pic"]; ok && pic != nil {
 		song.Cover = fmt.Sprintf("%v", pic)
 	}
-	if urlStr, ok := raw["url"]; ok {
+	if urlStr, ok := raw["url"]; ok && urlStr != nil {
 		song.URL = fmt.Sprintf("%v", urlStr)
 	}
 	return song, nil
+}
+
+func (s *MusicAPIService) convertSongList(items []map[string]any) []*model.Song {
+	var songs []*model.Song
+	for _, item := range items {
+		song := &model.Song{
+			ID:     fmt.Sprintf("%v", item["id"]),
+			Name:   fmt.Sprintf("%v", item["name"]),
+			Artist: fmt.Sprintf("%v", item["artist"]),
+			Album:  fmt.Sprintf("%v", item["album"]),
+		}
+		if platform, ok := item["platform"]; ok && platform != nil {
+			song.Source = fmt.Sprintf("%v", platform)
+		} else if src, ok := item["source"]; ok && src != nil {
+			song.Source = fmt.Sprintf("%v", src)
+		}
+		if pic, ok := item["pic"]; ok && pic != nil {
+			song.Cover = fmt.Sprintf("%v", pic)
+		}
+		if urlStr, ok := item["url"]; ok && urlStr != nil {
+			song.URL = fmt.Sprintf("%v", urlStr)
+		}
+		songs = append(songs, song)
+	}
+	if songs == nil {
+		songs = []*model.Song{}
+	}
+	return songs
+}
+
+func (s *MusicAPIService) parseSongList(data json.RawMessage) ([]*model.Song, error) {
+	var rawList []map[string]any
+	if err := json.Unmarshal(data, &rawList); err != nil {
+		return nil, err
+	}
+	return s.convertSongList(rawList), nil
 }
 
 func (s *MusicAPIService) get(params url.Values) (json.RawMessage, error) {
@@ -212,14 +251,14 @@ func (s *MusicAPIService) get(params url.Values) (json.RawMessage, error) {
 
 func (s *MusicAPIService) mockCategories() []*model.Category {
 	return []*model.Category{
-		{ID: "cat_1", Name: "华语流行", Source: "netease"},
-		{ID: "cat_2", Name: "粤语经典", Source: "netease"},
-		{ID: "cat_3", Name: "摇滚", Source: "netease"},
-		{ID: "cat_4", Name: "民谣", Source: "netease"},
-		{ID: "cat_5", Name: "DJ/Remix", Source: "netease"},
-		{ID: "cat_6", Name: "欧美流行", Source: "netease"},
-		{ID: "cat_7", Name: "日韩精选", Source: "netease"},
-		{ID: "cat_8", Name: "影视原声", Source: "netease"},
+		{ID: "19723756", Name: "飙升榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "3779629", Name: "原创榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "3778678", Name: "热歌榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "2884035", Name: "网易云DJ榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "991319590", Name: "说唱榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "71385702", Name: "古典榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "1978921795", Name: "电音榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
+		{ID: "60198", Name: "韩国榜", Source: "netease", Cover: "https://p1.music.126.net/rIi7Qzy2i2Y_1QD7cd0MYA==/109951170048506929.jpg"},
 	}
 }
 

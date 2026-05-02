@@ -63,6 +63,14 @@ type CategorySongsParams struct {
 	Limit     int    `form:"limit"`
 }
 
+type User struct {
+	OpenID    string `json:"open_id"`
+	NickName  string `json:"nick_name"`
+	Avatar    string `json:"avatar"`
+	Role      string `json:"role"`
+	CreatedAt int64  `json:"created_at"`
+}
+
 type CreateOrderParams struct {
 	SongID   string `json:"song_id"`
 	SongName string `json:"song_name"`
@@ -72,4 +80,14 @@ type CreateOrderParams struct {
 	Message  string `json:"message"`
 	SingerID string `json:"singer_id"`
 	Price    int64  `json:"price"`
+}
+
+type LoginParams struct {
+	Code     string `json:"code"`
+	NickName string `json:"nick_name"`
+	Avatar   string `json:"avatar"`
+}
+
+type SwitchRoleParams struct {
+	Role string `json:"role"`
 }

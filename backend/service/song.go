@@ -34,6 +34,17 @@ func (s *SongService) GetCategorySongs(toplistID, source string, page, limit int
 	return s.musicAPI.GetToplistSongs(toplistID, source, page, limit)
 }
 
+func (s *SongService) GetRecommendSongs(source string, page, limit int) ([]*model.Song, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if limit <= 0 {
+		limit = 20
+	}
+	// 当没有指定分类时，返回热门搜索的推荐歌曲（使用空关键词搜索获取热门歌曲）
+	return s.musicAPI.Search("", source, page, limit)
+}
+
 func (s *SongService) GetSongInfo(source, id string) (*model.Song, error) {
 	return s.musicAPI.GetSongInfo(source, id)
 }

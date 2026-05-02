@@ -1,49 +1,129 @@
 <view class="page">
-  <view class="search-bar">
-    <view class="search-input-wrap">
-      <image class="search-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E" />
-      <input class="search-input" placeholder="搜索歌曲、歌手" value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" confirm-type="search" />
-      <view class="search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">✕</view>
+  <view class="top-bar">
+    <view class="user-info" bindtap="{{userInfo ? 'onLogout' : 'onTapLogin'}}">
+      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill" />
+      <text class="user-name">{{userInfo.nick_name || '点击登录'}}</text>
     </view>
-    <view class="source-picker">
-      <picker mode="selector" range="{{['网易云', '酷我', 'QQ']}}" bindchange="onSourceChange">
-        <view class="source-label">{{source === 'netease' ? '网易云' : source === 'kuwo' ? '酷我' : 'QQ'}}</view>
-      </picker>
+    <view class="role-switch" bindtap="onSwitchRole">
+      <view class="role-btn {{currentRole === 'singer' ? 'singer' : 'user'}}">
+        <text class="role-icon">{{currentRole === 'singer' ? '🎤' : '🎵'}}</text>
+        <text class="role-text">{{currentRole === 'singer' ? '歌手端' : '用户端'}}</text>
+      </view>
     </view>
   </view>
 
-  <scroll-view class="category-scroll" scroll-x enable-flex>
-    <view class="category-item {{activeCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-id="" data-name="推荐">
-      <text>推荐</text>
-    </view>
-    <view class="category-item {{activeCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onCategoryTap" data-id="{{item.id}}" data-name="{{item.name}}">
-      <text>{{item.name}}</text>
-    </view>
-  </scroll-view>
-
-  <view class="song-list">
-    <view class="song-card" wx:for="{{songs}}" wx:key="id" bindtap="onSongTap" data-song="{{item}}">
-      <image class="song-cover" src="{{item.cover || item.pic}}" mode="aspectFill" lazy-load />
-      <view class="song-info">
-        <text class="song-name">{{item.name}}</text>
-        <text class="song-artist">{{item.artist}}</text>
-        <text class="song-album" wx:if="{{item.album}}">{{item.album}}</text>
+  <block wx:if="{{currentRole === 'user'}}">
+    <view class="search-bar">
+      <view class="search-input-wrap">
+        <image class="search-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E" />
+        <input class="search-input" placeholder="搜索歌曲、歌手" value="{{keyword}}" bindinput="onSearchInput" bindconfirm="onSearch" confirm-type="search" />
+        <view class="search-clear" wx:if="{{keyword}}" bindtap="onClearSearch">✕</view>
       </view>
-      <view class="song-action">
-        <text class="song-price">点歌</text>
+      <view class="source-picker">
+        <picker mode="selector" range="{{['网易云', '酷我', 'QQ']}}" bindchange="onSourceChange">
+          <view class="source-label">{{source === 'netease' ? '网易云' : source === 'kuwo' ? '酷我' : 'QQ'}}</view>
+        </picker>
       </view>
     </view>
 
-    <view class="empty-state" wx:if="{{!loading && songs.length === 0}}">
-      <text class="empty-icon">🎵</text>
-      <text class="empty-text">暂无歌曲数据</text>
+    <scroll-view class="category-scroll" scroll-x enable-flex>
+      <view class="category-item {{activeCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-id="" data-name="推荐">
+        <text>推荐</text>
+      </view>
+      <view class="category-item {{activeCategory === item.id ? 'active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onCategoryTap" data-id="{{item.id}}" data-name="{{item.name}}">
+        <text>{{item.name}}</text>
+      </view>
+    </scroll-view>
+
+    <view class="singer-entry" bindtap="onBecomeSinger">
+      <view class="singer-entry-left">
+        <text class="singer-entry-icon">🎤</text>
+        <view class="singer-entry-text">
+          <text class="singer-entry-title">入驻成为歌手</text>
+          <text class="singer-entry-desc">接单演唱，展示你的歌喉</text>
+        </view>
+      </view>
+      <text class="singer-entry-arrow">→</text>
     </view>
 
-    <view class="loading-tip" wx:if="{{loading}}">
-      <text>加载中...</text>
+    <view class="song-list">
+      <view class="song-card" wx:for="{{songs}}" wx:key="id" bindtap="onSongTap" data-song="{{item}}">
+        <image class="song-cover" src="{{item.cover || item.pic}}" mode="aspectFill" lazy-load />
+        <view class="song-info">
+          <text class="song-name">{{item.name}}</text>
+          <text class="song-artist">{{item.artist}}</text>
+          <text class="song-album" wx:if="{{item.album}}">{{item.album}}</text>
+        </view>
+        <view class="song-action">
+          <text class="song-price">点歌</text>
+        </view>
+      </view>
+
+      <view class="empty-state" wx:if="{{!loading && songs.length === 0}}">
+        <text class="empty-icon">🎵</text>
+        <text class="empty-text">暂无歌曲数据</text>
+      </view>
+
+      <view class="loading-tip" wx:if="{{loading}}">
+        <text>加载中...</text>
+      </view>
+      <view class="loading-tip" wx:if="{{!hasMore && songs.length > 0}}">
+        <text>没有更多了</text>
+      </view>
     </view>
-    <view class="loading-tip" wx:if="{{!hasMore && songs.length > 0}}">
-      <text>没有更多了</text>
+  </block>
+
+  <block wx:else>
+    <view class="singer-panel">
+      <view class="singer-header">
+        <text class="singer-title">收到点歌订单</text>
+        <text class="singer-count" wx:if="{{userInfo}}">共 {{singerOrdersTotal}} 单</text>
+      </view>
+
+      <block wx:if="{{userInfo}}">
+        <view class="order-list">
+          <view class="order-card" wx:for="{{singerOrders}}" wx:key="id">
+            <view class="order-card-header">
+              <text class="order-card-id">{{item.id}}</text>
+              <text class="order-card-status status-{{item.status}}">{{item.status === 'pending' ? '待演唱' : item.status === 'singing' ? '演唱中' : item.status === 'done' ? '已完成' : item.status}}</text>
+            </view>
+            <view class="order-card-body">
+              <image class="order-card-cover" src="{{item.cover}}" mode="aspectFill" />
+              <view class="order-card-info">
+                <text class="order-card-name">{{item.song_name}}</text>
+                <text class="order-card-artist">{{item.artist}}</text>
+                <text class="order-card-msg" wx:if="{{item.message}}">留言：{{item.message}}</text>
+              </view>
+            </view>
+            <view class="order-card-footer">
+              <text class="order-card-user">来自：{{item.user_nick || '匿名用户'}}</text>
+              <view class="order-card-action" wx:if="{{item.status !== 'done'}}" bindtap="onOrderStatusTap" data-id="{{item.id}}" data-status="{{item.status}}">
+                <text class="action-btn">{{item.status === 'pending' ? '开始演唱' : '完成演唱'}}</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="empty-state" wx:if="{{!singerOrdersLoading && singerOrders.length === 0}}">
+            <text class="empty-icon">📋</text>
+            <text class="empty-text">暂无点歌订单</text>
+          </view>
+
+          <view class="loading-tip" wx:if="{{singerOrdersLoading}}">
+            <text>加载中...</text>
+          </view>
+          <view class="loading-tip" wx:if="{{!singerOrdersLoading && singerOrders.length > 0 && singerOrders.length >= singerOrdersTotal}}">
+            <text>没有更多了</text>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="login-prompt">
+          <text class="login-prompt-icon">🔒</text>
+          <text class="login-prompt-text">登录后查看点歌订单</text>
+          <button class="login-prompt-btn" bindtap="onTapLogin">微信登录</button>
+        </view>
+      </block>
     </view>
-  </view>
+  </block>
 </view>
