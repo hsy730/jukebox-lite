@@ -1,4 +1,6 @@
-var app = getApp();
+function getAppInstance() {
+  return getApp();
+}
 
 function getToken() {
   return wx.getStorageSync('token') || '';
@@ -24,14 +26,14 @@ function request(options) {
     }
 
     wx.request({
-      url: app.globalData.apiBase + options.url,
+      url: getAppInstance().globalData.apiBase + options.url,
       method: options.method || 'GET',
       data: options.data || {},
       header: header,
       success: function (res) {
         if (res.statusCode === 401) {
           removeToken();
-          app.globalData.userInfo = null;
+          getAppInstance().globalData.userInfo = null;
           wx.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
           setTimeout(function () {
             wx.navigateTo({ url: '/pages/login/login' });
@@ -42,6 +44,7 @@ function request(options) {
         if (res.data.code === 0) {
           resolve(res.data);
         } else {
+          console.error('[API] request error:', options.url, res.statusCode, res.data);
           wx.showToast({
             title: res.data.message || '请求失败',
             icon: 'none'
@@ -50,6 +53,7 @@ function request(options) {
         }
       },
       fail: function (err) {
+        console.error('[API] network error:', options.url, err);
         wx.showToast({
           title: '网络错误',
           icon: 'none'
